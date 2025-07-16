@@ -8,7 +8,7 @@ from difflib import get_close_matches
 import json
 
 app = Flask(__name__)
-genai.configure(api_key="AIzaSyBRxy5ZHUyA7SMAPiXVxK4LXhyY_xr4E48")
+genai.configure(api_key="AIzaSyAKYsBK0VBoQBmM_bxvxX4FMosREvUn2Ak")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 TEMP_FOLDER = "./static/Temp"

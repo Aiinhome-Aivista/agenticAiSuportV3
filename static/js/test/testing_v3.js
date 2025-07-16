@@ -125,7 +125,7 @@ const handleOnAiChat = () => {
 
     attachRecognitionEvents();
   }
-
+  let isFirstAudioPlaying = false;
   // ================ AI AUDIO PLAYBACK HANDLING ==================
   // Function to track AI speech playback and handle animations
   function trackAiSpeechPlayback(audioPath) {
@@ -165,6 +165,7 @@ const handleOnAiChat = () => {
       chatMic.classList.add("bg-green-300");
       chatMicIcon.src = micOnURI;
       lastRegularAudioPlaying = true;
+      isFirstAudioPlaying = true;
       startListening();
     };
 
@@ -289,7 +290,7 @@ const handleOnAiChat = () => {
     }, 15000); // 15 seconds of inactivity
   }
 
-  let  isFirstAudioPlaying= false;
+
 
   // ================ LANGUAGE SELECTION & API HELPER HANDLING ==================
   // handle for confirmation name & email audio ===> first API call
@@ -306,20 +307,44 @@ const handleOnAiChat = () => {
           return true;
         }
       // sessionStorage.setItem("sid", session_id);
-    
+     if (greeting !== null && greeting.includes(" Salesforce or o9?")) {
         sessionStorage.setItem("userEmail", JSON.stringify({ email }));
         sessionStorage.setItem("userCompanies", JSON.stringify({ companies }));
         sessionStorage.setItem("first_name", first_name);
         localStorage.setItem("greeting", greeting);
         appendAIMessage(greeting, timeString2);
         trackAiSpeechPlayback(api_ai_speech);
+        if(isFirstAudioPlaying){
+          setTimeout(async() => {
+            const localGreeting = localStorage.getItem("greeting");
+            if (localGreeting && localGreeting.toLowerCase().includes("hi")) {
+              console.log("Session greeting found:", localGreeting);
+              await regularApiCall(localGreeting);
+              localStorage.removeItem("greeting");
+            }
+          }, 200);
+          
+        }
+      }else{
+       sessionStorage.setItem("userEmail", JSON.stringify({ email }));
+       sessionStorage.setItem("userCompanies", JSON.stringify({ companies }));
+       sessionStorage.setItem("first_name", first_name);
+       localStorage.setItem("greeting", greeting);
+       appendAIMessage(greeting, timeString2);
+       trackAiSpeechPlayback(api_ai_speech);
+       if (isFirstAudioPlaying) {
+         setTimeout(async () => {
+           const localGreeting = localStorage.getItem("greeting");
+           if (localGreeting && localGreeting.toLowerCase().includes("hi")) {
+             console.log("Session greeting found:", localGreeting);
+             await regularApiCall(localGreeting);
+             localStorage.removeItem("greeting");
+           }
+         }, 200);
+      }
+    }
     
-       const localGreeting = localStorage.getItem("greeting");
-       if (localGreeting && localGreeting.toLowerCase().includes("hi")) {
-           console.log("Session greeting found:", localGreeting);
-           await regularApiCall(localGreeting);
-           localStorage.removeItem("greeting");
-       }
+      
        return false;
     } catch (error) {
         customToastUI(error.message, "error");

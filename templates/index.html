@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aiinhome POC-1</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- custom styles -->
+  <link rel="stylesheet"  href="{{ url_for('static', filename='css/styles.css') }}" />
+  <!-- favicon -->
+  <!-- <link rel="shortcut icon" href="{{ url_for('static', filename='assets/icons/ai-technology.ico') }}" type="image/x-icon"> -->
+</head>
+
+<body>
+  <!-- Background Image -->
+  <!-- <div class="absolute inset-0 bg-cover bg-center opacity-50" style="background-image: url('./assets/icons/HMLoginBG.svg');"></div> -->
+
+  <!-- Main Container -->
+  <div class="relative flex justify-center items-start h-[100vh] bg-cover bg-center"
+    style="background-image: url('{{ url_for('static', filename='assets/icons/HMLoginBG.svg') }}'),linear-gradient(117.21deg, #141414 80.75%, #484848 149.51%);">
+    <!-- Logo in top-left -->
+    <!-- <img src="/assets/icons/anuLogo.svg" alt="ANU Logo" class="absolute top-[4%] left-[2%] w-18 h-16" /> -->
+
+   
+    <!-- Login Container -->
+    <div class="relative flex flex-col items-center text-white h-full w-full max-w-md bg-transparent pt-24 px-6">
+      <div class="w-full flex flex-col items-center justify-start gap-4">
+
+        <!-- Logo & Welcome -->
+        <div class="flex flex-col items-center gap-3">
+          <div class="bg-gray-200  rounded-full overflow-hidden w-16 h-16 outline outline-offset-2 outline-purple-600">
+            <img src="{{ url_for('static', filename='assets/icons/female_icon.png') }}" alt="logo" class="w-full h-full object-cover rounded-full" />
+          </div>
+          <h3 class="text-center text-2xl font-semibold">Welcome to <span
+              class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Eva</span> Assistant</h3>
+        </div>
+
+        <!-- Subtitle -->
+        <p class="text-center text-lg font-light">Login to your account</p>
+
+        <!-- Form -->
+        <div class="w-full">
+          <div class="mb-4">
+            <label for="username" class="block text-sm font-medium mb-1">Username <span
+                class="text-red-500">*</span></label>
+            <input type="text" id="username" placeholder=" Enter Username"
+              class="w-full bg-[#131313] text-white border border-[#424b57] px-4 py-2 rounded focus:outline-none focus:border-[#8b04f5]" />
+          </div>
+          <div class="mb-4">
+            <label for="password" class="block text-sm font-medium mb-1">Password <span
+                class="text-red-500">*</span></label>
+            <input type="password" id="password" placeholder="Enter password"
+              class="w-full bg-[#131313] text-white border border-[#424b57] px-4 py-2 rounded focus:outline-none focus:border-[#8b04f5]" />
+          </div>
+          <button type="button"
+            class="w-full flex justify-center items-center gap-2 bg-[#8b04f5] text-white py-2 rounded font-medium hover:bg-[#7a03d8] transition"
+            id="login-button">
+            Login
+            <img src="{{ url_for('static', filename='/assets/icons/fi_arrow-right.svg') }}" alt="" class="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+
+</html>

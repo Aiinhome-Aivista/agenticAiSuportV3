@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aiinhome POC-1</title>
+  <!-- tailwind configuratins -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+    }
+  </style>
+  <!-- custom styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+
+  <!-- favicon -->
+  <!-- <link rel="shortcut icon" href="{{ url_for('static', filename='assets/icons/ai-technology.ico') }}" type="image/x-icon" /> -->
+</head>
+
+<body data-userIcon="{{ url_for('static', filename='assets/icons/user_icon.png') }}"
+  data-aiIcon="{{ url_for('static', filename='assets/icons/female_icon.png') }}"
+  data-aiSpeech="{{ url_for('static', filename='Temp/speech.mp3') }}"
+  data-bengSpeech="{{ url_for('static', filename='Temp/media/bengali_speech.mpeg') }}"
+  data-engSpeech="{{ url_for('static', filename='Temp/media/english_speech.mp3') }}"
+  data-hindiSpeech="{{ url_for('static', filename='Temp/media/hindi_speech.mpeg') }}"
+  data-welcomeSpeech="{{ url_for('static', filename='Temp/media/welcome_speech.mp3') }}"
+  data-lottieURI="{{ url_for('static', filename='js/lottie-voice-bar-animation.json') }}"
+  data-micOnURI="{{ url_for('static', filename='assets/icons/mic-on-24.png') }}"
+  data-micOffURI="{{ url_for('static', filename='assets/icons/mute-24.png') }}"
+  class="bg-[url('{{ url_for('static', filename='assets/images/ai_bg.jpg') }}')] bg-cover bg-no-repeat bg-center w-full min-h-screen bg-opacity-50">
+
+  <header id="header"
+    class="backdrop-blur-md bg-white/10 border-b border-white/20 sticky top-0 z-10 h-24 md:h-16 content-auto shadow-md">
+    <div class="container w-full lg:w-[90%] lg:mx-auto flex justify-center md:justify-start items-center h-full">
+      <div class="w-full flex items-center justify-center h-full cursor-pointer">
+        <div class="w-14 h-14 rounded-full shadow-md flex items-center justify-center overflow-hidden">
+          <img src="{{ url_for('static', filename='assets/icons/Aiinhome_Logo.png') }}" alt="logo"
+            class="w-full h-full object-cover" loading="lazy" />
+        </div>
+
+        <div class="text-sm md:w-full brand-title flex flex-col justify-center h-full">
+          <h1 class="text-md text-white md:text-lg font-medium tracking-wider pl-4">Customer Engaged Reimagined</h1>
+          <p class="text-gray-300 text-sm pl-4 mt-1 md:mt-0">Eva Ai <span
+              class="bg-gradient-to-r from-blue-400 to-pink-600 font-medium bg-clip-text text-transparent">Agent</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="root">
+    <section
+      class="hero-section w-full h-screen py-1 bg-gray-600/10 backdrop-blur-[.25rem] shadow-md border-b border-white/20 rounded-md overflow-hidden overflow-y-auto hide-scrollbar">
+      <div class="container md:w-[92%] px-2 md:px-4 mx-auto p-3 h-full">
+        <div
+          class="wrapper md:flex md:justify-center bg-gradient-to-l from-slate-800/10 to-slate-800 backdrop-blur-[.25rem] shadow-md border border-white/20 rounded-md md:h-full">
+
+          <!-- starting of middle panel -->
+          <div class="middle-panel mt-3 md:mt-0 md:w-[100%] p-3 flex flex-col gap-2">
+            <div id="audio-container"
+              class="ai-chat-voice-container bg-red-300 opacity-0 absolute -z-10 pointer-events-none">
+              <audio id="ai-chat-voice" preload="auto"></audio>
+            </div>
+            <!-- chat header -->
+            <div class="chat-header">
+              <h3 class="text-gray-200 text-xl">Chat Assistant</h3>
+            </div>
+
+            <!-- chat area -->
+            <div
+              class="hero-chat-main h-full backdrop-blur-[.1rem] bg-gradient-to-r from-slate-900 to-slate-700 shadow-md border border-white/20 rounded-md border-t-4 border-t-orange-400 overflow-hidden overflow-y-auto hide-scrollbar bg-gradient-to-r from-blue-600/10 to-purple-600/10">
+              <!-- Hero Chat Area -->
+              <div
+                class="hero-chat-area h-[50vh] md:h-[70vh] overflow-y-auto hide-scrollbar transition-all duration-300 ease-in">
+                <!-- user chat area -->
+                <!-- <div class="user-chat-main flex justify-end items-center p-2">
+                  <div
+                    class="w-3/4 flex p-3 items-center gap-4 border border-white/20 rounded-md mx-1 mt-2 bg-slate-700">
+                    <div class="user-chat-icon w-8 h-8 p-1 bg-gray-100 rounded-full self-start text-center">
+                      <img src="./assets/icons/user-icon.png" alt="logo" class="object-cover rounded-full" />
+                    </div>
+                    <div class="user-chat-text w-full ">
+                      <p id="chat-text" class="break-words text-wrap text-sm text-justify text-gray-200">
+                      
+                      </p>
+                      <span id="time-stamp" class="text-[.75rem] text-gray-200 mt-2 block italic"></span>
+                    </div>
+                  </div>
+                </div> -->
+
+                <!-- Ai chat area -->
+                <!-- <div class="ai-chat-main">
+                  <div class="flex justify-start items-center p-2">
+                    <div class="w-3/4 flex p-3 items-center gap-4 border border-white/20 rounded-md mx-1 bg-slate-700">
+                      <div class="ai-chat-icon w-8 h-8 p-1 bg-gray-100 rounded-full self-start">
+                        <img src="./assets/icons/ai_bot-icon.png" alt="logo" class="object-cover rounded-full"
+                          alt="ai-icon" />
+                      </div>
+                      <div class="ai-chat-text w-full">
+                        <p class="break-words text-wrap text-sm text-justify text-gray-200">
+                          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officia reiciendis quibusdam earum
+                          alias
+                          aliquid illum
+                          quia placeat excepturi, blanditiis eius. Lorem ipsum dolor sit, amet consectetur adipisicing
+                          elit.
+                          Accusamus,
+                          asperiores?
+                        </p>
+                        <span id="time-stamp" class="text-[.75rem] text-gray-200 mt-2 block italic">17:45:10</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="raise-ticket-options flex items-center gap-2 px-3 pt-2 translate-y-[0%] hover:translate-y-0 transition-all duration-300 ease-in-out">
+                    <button id="raise-ticket-btn"
+                      class="bg-green-500/20 text-green-100 px-4 py-1 rounded-full border-[1px] outline-offset-2 border-green-500 shadow-md hover:bg-green-500/50 transition-colors duration-300 text-sm">Resolve</button>
+                    <button id="close-chat-btn"
+                      class="bg-rose-500/20 text-rose-100 px-4 py-1 rounded-full border-[1px] border-rose-500 shadow-md hover:bg-rose-500/50 transition-colors duration-300 text-sm">Raise
+                      Ticket</button>
+                    <button id="end-conversation-btn"
+                      class="bg-yellow-500/20 text-yellow-100 px-4 py-1 rounded-full border-[1px] border-yellow-500 shadow-md hover:bg-yellow-500/50 transition-colors duration-300 text-sm">Continue
+                      chat</button>
+                  </div>
+                </div> -->
+                <!-- end of ai chat area -->
+
+              </div>
+            </div> <!-- end of chat area -->
+
+            <!-- chat control box -->
+            <div
+              class="w-full h-16 bg-slate-700 shadow-md rounded-md mt-2 flex gap-2 p-2 border-t-4 border-t-orange-400">
+              <div class="chat-icons flex gap-2 items-center mx-2">
+                <div id="chat-turn-off" class="md:w-8 md:h-8 p-[1px] px-[4px] md:p-0 bg-gray-100 rounded text-center">
+                  <img src="{{ url_for('static', filename='assets/icons/turn_off-icon.png') }}" alt="turn-off-icon"
+                    class="object-cover hover:cursor-pointer w-6 h-6 md:w-8 md:h-8" width="24" height="24"
+                    loading="lazy" />
+                </div>
+                <div id="chat-mic" class="md:w-8 md:h-8 p-1 bg-gray-100 rounded text-center">
+                  <img src="{{ url_for('static', filename='assets/icons/mute-icon.png') }}" alt="microphone-icon"
+                    class="object-cover hover:cursor-pointer" width="24" height="24" loading="lazy" id="mic-icon" />
+                </div>
+                <div id="lottie-animation" class="w-8 h-8"></div>
+                <div id="is-connected" class="flex items-center gap-3">
+                  <!-- <button class="text-gray-100 bg-slate-600 p-2 rounded shadow-md outline-[1px] outline-offset-1 hover:text-yellow-500" type="button" id="resetBtn">Reset Voice</button> -->
+                  <p class="text-[.75rem] md:text-sm text-gray-100">You are now connected to the server...</p>
+                </div>
+              </div>
+            </div> <!-- end of chat control box -->
+          </div> <!-- end of middle-panel -->
+
+
+          <!-- start of left panel -->
+          <div id="left-panel"
+            class="md:w-1/2 lg:w-2/6 h-48 md:h-auto bg-white/10 shadow-md border-b border-white/20 rounded-r-md">
+            <div class="p-2">
+              <!-- Title outside the card container -->
+              <div class="right-panel-title pt-1 pb-2">
+                <h5 class="text-left text-gray-100 text-lg">
+                  Assistance Chat History
+                </h5>
+              </div>
+              <!-- Card container -->
+              <!-- Outer wrapper with green top border and rounded corners -->
+              <div class="rounded-md border-t-4 border-t-yellow-400 mt-1">
+                <!-- Inner card container -->
+                <div class="bg-white/10 p-2 rounded-b-md">
+                  <!-- Conversation Cards -->
+                  <div class="space-y-1.5">
+                    <!-- Entry 1 -->
+                    <div
+                      class="bg-gray-600/10 backdrop-blur-[.2rem] shadow-md border-b border-white/20 border border-gray-500 rounded p-1.5 shadow-sm text-xs text-gray-100 leading-tight">
+                      21/02/2025, 17:41:51<br>
+                      0 messages
+                    </div>
+                    <!-- Entry 2 -->
+                    <div
+                      class="bg-gray-600/10 backdrop-blur-[.2rem] shadow-md border-b border-white/20 border border-gray-500 rounded p-1.5 shadow-sm text-xs text-gray-100 leading-tight">
+                      21/02/2025, 17:44:42<br>
+                      16 messages
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> <!-- end of left panel -->
+
+
+          <!-- start of right panel -->
+          <!-- <div id="right-panel" class="md:md:w-1/2 lg:w-2/6 h-48 md:h-auto mt-3 md:mt-0 bg-slate-700 rounded-r-md px-2">
+            <div class="right-panel-title pt-4 pb-2">
+              <h5 class="text-left text-gray-100 text-lg">Agent Workflow</h5>
+            </div>
+            <div class="bg-white/10 rounded-md border-t-4 border-t-orange-400 p-2">
+              <div class="w-max">
+                <div id="stepTracker" class="flex flex-col items-center space-y-4"></div>
+              </div> 
+            </div>
+          </div>  -->
+          <!-- end of right panel -->
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- lottie script file configuration -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie.min.js"></script>
+
+  <script src="{{ url_for('static', filename='js/lottie.config.js') }}"></script>
+
+  <!-- custom scripts -->
+  <!-- in final version un-comment the line 174 -->
+  <!-- <script src="{{ url_for('static', filename='js/app.js') }}" type="module"></script> -->
+
+  <!-- test mode file -->
+  <script src="{{ url_for('static', filename='js/test/testing_v3.js') }}" type="module"></script>
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+[11:58:01] User: english
+[11:58:01] Ai: Great! Let's continue in English. Thank you for your response. Please share your name & email to continue.
+[11:58:19] User: my name is sanchari karmakar and email address is sanchari karmakar 40@gmail.com
+[11:58:19] Ai: Hi Sanchari,
+[11:58:38] User: what are the access and refresh token
+[11:58:42] Ai: In Salesforce, access and refresh tokens are used to authorize API calls and keep your sessions active.  The access token is used for immediate access, while the refresh token allows you to obtain a new access token when the first one expires.
+[11:59:04] User: what is lightning cost
+[11:59:06] Ai: You don't have access to this information.
+[11:59:36] User: i am not satisfied with this session
+[11:59:44] User: race ticket

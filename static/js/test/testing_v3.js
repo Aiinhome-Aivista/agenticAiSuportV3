@@ -25,6 +25,7 @@ const chatMicIcon = document.getElementById("mic-icon");
 const USER_ICON = document.body.dataset.usericon;
 const AI_BOT_ICON = document.body.dataset.aiicon;
 const api_ai_speech = document.body.dataset.aispeech;
+const ai_greet_error_speech = document.body.dataset.greeterrorspeech; 
 const ai_beng_speech = document.body.dataset.bengspeech;
 const ai_eng_speech = document.body.dataset.engspeech;
 const ai_hindi_speech = document.body.dataset.hindispeech;
@@ -164,7 +165,7 @@ const handleOnAiChat = () => {
       chatMic.classList.add("bg-green-300");
       chatMicIcon.src = micOnURI;
       lastRegularAudioPlaying = true;
-    //   startListening();
+      startListening();
     };
 
     aiAudioVoice.onerror = (e) => {
@@ -288,6 +289,8 @@ const handleOnAiChat = () => {
     }, 15000); // 15 seconds of inactivity
   }
 
+  let  isFirstAudioPlaying= false;
+
   // ================ LANGUAGE SELECTION & API HELPER HANDLING ==================
   // handle for confirmation name & email audio ===> first API call
   async function handleConfirmationAudio(transcript) {
@@ -295,23 +298,29 @@ const handleOnAiChat = () => {
        console.log("Handling confirmation audio with transcript:", transcript);
        const now2 = new Date();
        const timeString2 = now2.toTimeString().split(" ")[0];
-       const { summary: greeting, companies, email, session_id } = await greetingAIResponse(transcript);
+       const { summary: greeting, companies, email, session_id, first_name } = await greetingAIResponse(transcript);
        if (greeting === null || greeting === undefined) {
-           throw new Error("Something went wrong!, try again");
+         appendAIMessage("Sorry your details do not exist in my system. Please share correct credentials.", timeString2);
+          speakStaticAudioText(ai_greet_error_speech);
+         awaitingNameEmail = true;    
+          return true;
         }
-        // sessionStorage.setItem("sid", session_id);
+      // sessionStorage.setItem("sid", session_id);
+    
         sessionStorage.setItem("userEmail", JSON.stringify({ email }));
         sessionStorage.setItem("userCompanies", JSON.stringify({ companies }));
-       localStorage.setItem("greeting", greeting);
+        sessionStorage.setItem("first_name", first_name);
+        localStorage.setItem("greeting", greeting);
         appendAIMessage(greeting, timeString2);
         trackAiSpeechPlayback(api_ai_speech);
-
+    
        const localGreeting = localStorage.getItem("greeting");
        if (localGreeting && localGreeting.toLowerCase().includes("hi")) {
            console.log("Session greeting found:", localGreeting);
            await regularApiCall(localGreeting);
            localStorage.removeItem("greeting");
        }
+       return false;
     } catch (error) {
         customToastUI(error.message, "error");
         return;
@@ -475,8 +484,10 @@ const handleOnAiChat = () => {
       if (awaitingNameEmail) {
         // === NAME & EMAIL PHASE ===
         if ((transcript.includes("my name is") || transcript.includes("i am ") || transcript.includes("myself") || transcript.includes("name is")) && (transcript.includes("email") || transcript.includes("mail"))) {
-          await handleConfirmationAudio(transcript); // === first API call ===
-          awaitingNameEmail = false;
+           let respFlag = await handleConfirmationAudio(transcript); 
+           if(!respFlag) {
+            awaitingNameEmail = false; // reset awaiting state
+          }
           return;
         } else {
           appendAIMessage("Please share your name & email to continue.", timeString);
@@ -634,16 +645,19 @@ const handleOnAiChat = () => {
       const getSessionEmail = JSON.parse(sessionStorage.getItem("userEmail"))?.email;
       const getSessionCompanies = JSON.parse(sessionStorage.getItem("userCompanies"))?.companies;
       const getSessionId = sessionStorage.getItem("sid");
+      const firstName = JSON.parse(sessionStorage.getItem("first_name"));
 
-      if (!getSessionEmail || !getSessionCompanies || !getSessionId) {
-        // console.warn("Session data for email or companies is missing.");
-        customToastUI("missing data", "error");
-        return {
-          summary: "Session data for email or companies is missing.",
-          matched: false,
-          audio_file: null,
-        };
-      }
+      // if (!getSessionEmail || !getSessionCompanies || !getSessionId) {
+      //   // console.warn("Session data for email or companies is missing.");
+      //   // customToastUI("Missing data for email or companies is missing.", "error");
+      //   appendAIMessage("Session data for email or companies is missing.", new Date().toTimeString().split(" ")[0]);
+      //   startListening();
+      //   return {
+      //     summary: "Session data for email or companies is missing.",
+      //     matched: false,
+      //     audio_file: null,
+      //   };
+      // }
 
 
       // Create new controller for this request
@@ -657,7 +671,8 @@ const handleOnAiChat = () => {
           Connection: "keep-alive",
         },
         body: JSON.stringify({
-            id: getSessionId,
+          id: getSessionId,
+          first_name: firstName,
           question: userText,
           companies: getSessionCompanies,
           email: getSessionEmail

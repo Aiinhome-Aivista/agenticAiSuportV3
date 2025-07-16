@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify,render_template
+from flask import Flask, request, jsonify, render_template
 import google.generativeai as genai
 import pyodbc
 from gtts import gTTS
@@ -8,7 +8,7 @@ from difflib import get_close_matches
 import json
 
 app = Flask(__name__)
-genai.configure(api_key="AIzaSyBAZymOAXFyooYK4fcE8kq-YHWh9Em-1bs")
+genai.configure(api_key="AIzaSyBRxy5ZHUyA7SMAPiXVxK4LXhyY_xr4E48")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 TEMP_FOLDER = "./static/Temp"
@@ -111,16 +111,57 @@ def ask():
     q = data.get("question", "").strip().lower()
     email = data.get("email")
     companies = data.get("companies", [])
+    first_name = data.get("first_name", "").strip()
 
     if not sid or not email or not companies:
         return jsonify(error="Missing fields"), 400
 
     sess = session_context.setdefault(sid, {
-        "phase": "show_options", "faq_df": None, "selected_qs": [], "email": email
+        "phase": None,
+        "faq_df": None,
+        "selected_qs": [],
+        "email": email,
+        "companies": companies,
+        "selected_company": None
     })
 
+    # Step 1: Ask for company if multiple, else move on
+    if sess["phase"] is None:
+        if len(companies) == 1:
+            sess["selected_company"] = companies[0]
+            sess["phase"] = "show_options"
+        else:
+            sess["phase"] = "choose_company"
+            company_names = " or ".join([c["name"] for c in companies])
+            msg = f"Hi {first_name}, do you need my assistance in {company_names}? Please select one."
+            generate_audio(msg)
+            return jsonify(response=msg, audio_file=get_static_audio_uri())
+
+    # Step 2: Handle company selection
+    if sess["phase"] == "choose_company":
+        idx_match = re.search(r"\b(?:number|no|option)?\s*(\d+)\b", q)
+        idx = int(idx_match.group(1)) - 1 if idx_match else -1
+
+        selected = None
+        if idx >= 0 and idx < len(companies):
+            selected = companies[idx]
+        else:
+            for c in companies:
+                if c["name"].lower() in q:
+                    selected = c
+                    break
+
+        if selected:
+            sess["selected_company"] = selected
+            sess["phase"] = "show_options"
+        else:
+            msg = "Sorry, I couldn't understand. Please mention the company name or its number."
+            generate_audio(msg)
+            return jsonify(response=msg, audio_file=get_static_audio_uri())
+
+    # Step 3: Load FAQ if not already loaded
     if sess["faq_df"] is None:
-        df = get_faq_df(companies)
+        df = get_faq_df([sess["selected_company"]])
         if df.empty:
             msg = "You don't have access to any module-related help content."
             generate_audio(msg)
@@ -128,12 +169,13 @@ def ask():
         sess["faq_df"] = df
         questions = df["question_faq"].dropna().tolist()
         sess["selected_qs"] = random.sample(questions, min(3, len(questions)))
-        options_msg = "Hello there!  I am your virtual assistant Eva from Aiinhome. Let me know how I can  help you. Do you need help with: \n"
+        options_msg = "Hello there! I am your virtual assistant Eva from Aiinhome. Let me know how I can help you. Do you need help with:\n"
         options_msg += '\n'.join([f"{i+1}. {q}" for i, q in enumerate(sess["selected_qs"])])
-        options_msg += "\n. something else"
+        options_msg += "\n4. Something else"
         generate_audio(options_msg)
         return jsonify(response=options_msg, audio_file=get_static_audio_uri())
 
+    # Main logic continues
     df = sess["faq_df"]
     faq_rows = df.to_dict("records")
     faq_list = df["question_faq"].dropna().tolist()
@@ -148,7 +190,6 @@ def ask():
         index = extract_question_number(q, len(sess["selected_qs"]))
         if index is not None:
             selected_q = sess["selected_qs"][index]
-            # ✅ Check if selected_q is from allowed module
             if selected_q not in faq_list:
                 msg = "You don't have access to this question. Please ask within your module."
                 generate_audio(msg)
@@ -199,7 +240,7 @@ def ask():
             sess["phase"] = "await_ticket_confirmation"
             msg = "Would you like to raise a ticket to connect with our technical team?"
         else:
-            msg = "Please reply with yes or no to understand that we are able to solve your previous problems."
+            msg = "Please reply with yes or no to understand if we solved your problem."
         generate_audio(msg)
         return jsonify(response=msg, audio_file=get_static_audio_uri())
 
@@ -208,10 +249,10 @@ def ask():
             ticket_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
             send_ticket_email(sess["email"], ticket_id)
             sess["phase"] = "show_options"
-            msg = f"our technical suport will connect with you soon.Your ticket ID is {ticket_id}. Would you like to ask another question"
+            msg = f"Our technical team will connect with you soon. Your ticket ID is {ticket_id}. Would you like to ask another question?"
         else:
             sess["phase"] = "await_more_or_escalate"
-            msg = "Would you like to ask another question on your modules or connect to our customer support?"
+            msg = "Would you like to ask another question from your modules or connect to customer support?"
         generate_audio(msg)
         return jsonify(response=msg, audio_file=get_static_audio_uri())
 
@@ -219,19 +260,19 @@ def ask():
         if "ask" in q or "question" in q:
             sess["phase"] = "show_options"
             return ask()
-        elif any(keyword in q for keyword in ["connect", "authority", "speak", "talk", "support", "customer service","customer support", "human","ok lets go"]):
+        elif any(keyword in q for keyword in ["connect", "authority", "speak", "talk", "support", "customer service", "customer support", "human", "ok lets go"]):
             authority_number = f"+91-{random.randint(1000,9999)}-{random.randint(100000,999999)}"
-            msg = f"keep mobiles close to You.our customer support team will connect in 10 minutes at {authority_number} number"
+            msg = f"Keep your mobile close. Our customer support team will contact you within 10 minutes at {authority_number}."
             sess["phase"] = "show_options"
-
         else:
-            msg = "Please specify if you want to ask more questions or connect to authority."
+            msg = "Please specify if you want to ask more questions or connect to support."
         generate_audio(msg)
         return jsonify(response=msg, audio_file=get_static_audio_uri())
 
     msg = "Let's continue. Ask your next question."
     generate_audio(msg)
     return jsonify(response=msg, audio_file=get_static_audio_uri())
+
 
 
 
@@ -399,20 +440,22 @@ def greet_user():
         "companies": companies,
         "session_id": session_id,
         "email": email,
+        "first_name": first_name,
         "summary": summary,
         "audio_path": "/static/Temp/speech.mp3"
     }), 200
+
+
+
+
 
 
 # ========== UI Routes (Optional) ==========
 @app.route("/", methods=["GET"])
 def index():
     return render_template("./chatbot.html")
-    # return render_template("./ai-chatboat/index.html")
 
-# @app.route("/chatbot")
-# def chatbot():
-#     return render_template("./chatbot.html")
+
 
 
 # ========== 7. Run ==========
